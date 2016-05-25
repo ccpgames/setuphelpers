@@ -23,9 +23,9 @@ from setuphelpers import git_version
 setup(name="my_thing", version=git_version())
 ```
 
-Note that you cannot deploy a sdist package using git_version, due to needing
-access to .git. But please don't start including .git's in your packages.
-There is a pattern you can use to have git_version write out to a file to
+Note that you cannot deploy a sdist package using `git_version`, due to needing
+access to `.git`. But please don't start including `.git`'s in your packages.
+There is a pattern you can use to have `git_version` write out to a file to
 include, but I would argue that there's not a need to do that, as it's already
 included in the written package metadata anyway (wheels \> \*). But if you must:
 
