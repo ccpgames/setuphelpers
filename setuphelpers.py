@@ -57,8 +57,6 @@ def test_command(pytest=True, nose=False, unittest=False, **kwargs):
     elif unittest:
         test_class = unittest_command(**kwargs)
     else:
-        # make pytest last since it's the default, then you don't have to
-        # worry about negating it if you want to use either of the others
         test_class = pytest_command(**kwargs)
 
     return {"test": test_class}

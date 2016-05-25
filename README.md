@@ -23,6 +23,33 @@ from setuphelpers import git_version
 setup(name="my_thing", version=git_version())
 ```
 
+Note that you cannot deploy a sdist package using git_version, due to needing
+access to .git. But please don't start including .git's in your packages.
+There is a pattern you can use to have git_version write out to a file to
+include, but I would argue that there's not a need to do that, as it's already
+included in the written package metadata anyway (wheels \> \*). But if you must:
+
+```python
+import os
+import io
+from setuptools import setup
+from setuphelpers import git_version
+from setuphelpers import find_version
+
+# VER_FILE should not exist in your checked in source
+VER_FILE = os.path.join("my_thing", "__version__.py")
+if os.path.isfile(VER_FILE):
+    # this should only be run during rebuilding a sdist package
+    VERSION = find_version(VER_FILE)
+else:
+    # this should be run only during the actual packaging
+    VERSION = git_version()
+    with io.open(VER_FILE, "w", encoding="utf-8") as openversion:
+        openversion.write('__version__ = "{}"'.format(VERSION))
+
+setup(name="my_thing", version=VERSION)
+```
+
 ### `long_description`
 
 Use to fill in the long_description field with the contents of your README.
