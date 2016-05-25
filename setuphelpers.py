@@ -105,7 +105,7 @@ def pytest_command(verbose=True, exit_first=True, pdb=False, extra_fails=True,
             self.test_suite = True
             self.test_args = test_args
 
-        def run_tests(self):
+        def run_tests(self):  # pragma: no cover
             """Pytest discovery and test execution."""
 
             import pytest
@@ -148,7 +148,7 @@ def nose_command(verbose=True, detailed=True, cover=None):
             self.test_suite = True
             self.test_args = test_args
 
-        def run_tests(self):
+        def run_tests(self):  # pragma: no cover
             """Nose test discovery and execution."""
 
             import nose
@@ -180,7 +180,7 @@ def unittest_command(test_dir="tests"):
             self.test_suite = True
             self.test_args = []
 
-        def run_tests(self):
+        def run_tests(self):  # pragma: no cover
             """Unittest discovery and test execution."""
 
             import unittest
@@ -209,29 +209,36 @@ def git_version():
 
     If we are building a package from a branch other than master,
     +branch name is appended as the local version identifier.
+
+    If we are running on travis.ci, use the environment variables available.
     """
 
     try:
-        branch = _get_branch()
+        branch = os.environ.get("TRAVIS_BRANCH", _get_branch())
     except (OSError, IOError):
         print("warning: could not determine active git branch")
         branch = "master"
 
-    if _has_tags():
-        git_tag = _lastest_tag()
-        dev_release = _commits_since(_tag_ref(git_tag))
-        is_dev = dev_release > 0
-        if is_dev:
-            git_tag = _plus_one_minor(git_tag)
+    git_tag = os.environ.get("TRAVIS_TAG")
+    if git_tag:
+        is_dev = False
+        dev_release = 0
     else:
-        print("warning: git tag version requested but no tags found")
-        git_tag = "0.0.1"
-        is_dev = True
-        try:
-            dev_release = _commits_since()
-        except (OSError, IOError):
-            print("warning: no commits found, assuming first dev release")
-            dev_release = 1
+        if _has_tags():
+            git_tag = _lastest_tag()
+            dev_release = _commits_since(_tag_ref(git_tag))
+            is_dev = dev_release > 0
+            if is_dev:
+                git_tag = _plus_one_minor(git_tag)
+        else:
+            print("warning: git tag version requested but no tags found")
+            git_tag = "0.0.1"
+            is_dev = True
+            try:
+                dev_release = _commits_since()
+            except (OSError, IOError):
+                print("warning: no commits found, assuming first dev release")
+                dev_release = 1
 
     return "{}{}{}".format(
         git_tag,
@@ -276,7 +283,7 @@ def _read_file(file_):
 def _commits_since(ref=None):
     """Returns the integer number of commits since ref (or None for all)."""
 
-    cmd = ["git", "rev-list", "--all", "--count"]
+    cmd = ["git", "rev-list", "--all", "--no-merges", "--count"]
     if ref:
         cmd.append("{}..HEAD".format(ref))
     return int(check_output(cmd))
@@ -296,4 +303,16 @@ def _plus_one_minor(version):
 def _get_branch():
     """Returns the string branch name HEAD is pointing at."""
 
-    return _read_file(os.path.join(".git", "HEAD")).split("/")[-1]
+    branch = _read_file(os.path.join(".git", "HEAD")).split("/")[-1]
+    try:
+        remotes = os.listdir(os.path.join(".git", "refs", "remotes"))
+    except OSError:
+        print("warning: no remotes found, assuming master branch")
+    else:
+        for rem in remotes:
+            branches = os.listdir(os.path.join(".git", "refs", "remotes", rem))
+            if branch in branches:
+                return branch
+        print("warning: unknown branch: {}, assuming master".format(branch))
+
+    return "master"
