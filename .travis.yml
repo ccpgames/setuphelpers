@@ -1,0 +1,38 @@
+language: python
+python:
+- "3.5"
+env:
+- TOXENV=py27
+- TOXENV=py35
+- TOXENV=pep8
+before_install:
+- pip install -U coveralls pip pytest pytest-cov setuptools wheel tox
+script:
+- tox
+after_success:
+- coveralls
+notifications:
+  slack:
+    secure: "Ucq3YE759qt7s+gAy9R50mWRpUH5izlrB9xqgx6584lvL/cF3d1AEOFARB0wZAxqJIV77/niY+gBP4DOTyIzmYDqRDTs+vDokeixX7eXJPONlFK0kv/MyzTqH2VJfbhp+5s5wzJeUlZqQkNXROpd3W3R2yov+vgNx6k1f+bJrMIxu1Nzi2G6RTGHAg+b8HB1wy4Oqqt5+h8zQG1EjDsy4pnNK3LIFN0FROUUnOFE5orQwaqysS7izHFpn9f9NiqkiWqPt7nNZPIN48Vpvf3FQ+mf8AxRVDGjKqgK+dyedOUlK/64zBX3u2syZ9WPHchIRboZyJj5CRZ5ecQTKB5BP+lUSYUUqcKDr675+DfN3nHt5+QIcirGPzpzAg5pNx/g07biDsRePlbhxseJvabWDWkB5kCFgCFP7eVlFLi0Dg+HkSDdJKytj4W58r7ILmo3LgQz8gVBzJZ5sSTEFxviQQ+qAxh0QXxUtGJVHHMV7glkfxeevGJWkJlOQuoyOFTzUmouBrU+V7v1crRSnHIv93BtpxVFjsOozPt5iW8A7SZ6WzecRmZN1GgiaTFsCWLRqbPTeJI2HRanUvltFPgL+sJdmPSWLJOGLIpdTzo20NRbz40w0/6tCwTgD57HIAefj3Jauoi5U4ae9E/bLgNI+1K1US4TtxEUUZTXq9LKrUo="
+before_deploy:
+- python setup.py build bdist_wheel
+deploy:
+  - provider: pypi
+    user: atal
+    skip_cleanup: true
+    distributions: "bdist_wheel"
+    password:
+      secure: "nCWXETP46f8ribAQGIzxEzctddMbdiicLGJywYcefscpFabOnTAu/E4IkiuHPER8SmaIV0mcg9vjN2YGma+2jviG4K+6Owte5r0HLSRuXG1usZFua5JSNxlB+7jl1Yy2+21uYlEOcnNjuSDQJWzQjvgsWcB0JiBnIECWj+lWS5OOcC3tLTMDjVzGrccnfmVJjwyt5SgrIUj2znqSFAdx6zNbYz1ToLhyBo57xkLlKNzRYguPttTqanNSczVutuKu4WnQsRUHq5ZKEIozAeNIAkn38TidAr5VP9ToflIE5/4Cy3P6g8Ocgccmf7vbTyzIGEjDlt9Ag6ZrCybWsf0NfNYXhg9I592TU2SDKPE7+OM9ycoD64TslWBCirslwTmyuv0bG7pbsxW1648bFPFOmN1XkstS3MltCFsUAIrneaEDOYWJeaCtdD2dSrAX797Ql+lwWwcEKmGPSuB3nzghjH2lI0mVg+9pxVLlnacAOmdo8FdIsn/qj7hnIbPKMVXc1TnXeZ2vH7fyLTJM4hcM8kglf50dQ4DVlE40TETDc38DxfOYeQxeMbXRRcStk7iSJXIqJlCX3RSBu+lt+Z3jDcMUk6IlCz79xKlRg9ml3oL6ZhXJeZOZu2/pA/jWy+TX0hHip+H8WzV1m+WbQG4Pbfhmn2MF7c3npLoB9sngdJI="
+    on:
+      tags: true
+      repo: ccpgames/setuphelpers
+      condition: $TOXENV = py35
+  - provider: releases
+    api_key:
+      secure: "M6qKskREOvjawhp36+9rke2MQ/ciSZwD1+kUAX/I4lwG8bAOBdEC1HfhXN1yvVAaunBDSqpPOIxiKvgXmvLKXBvmgmsiWg/Dom79jf0NMhbxlZJVCK5RK3vfMWxFYz0irkDKyDsB835fEMVt2G68FqlEqBbdX/R1/wB47uf60v1nLCxeWp59NwfLwG9YEncWiIGcTr7smEwT5HNtZVraZxDUHPcBUJGtxIYQfv4YlohK71lErSlMuyvOVIuetgtTUGPE4dWgKFIz2k7iOnCXwMMi/TyZ+YD1ypHB5lBAfoDoKiMXL3KEqg3qx64meBLKUHDd5lKOVvPa04Mlbe0oA9mJitSFtdhFcrf7f5Hf6CVHQEoamp5ou8a+5PaA2RaeSpz1y+aXYYw5VcVyQiFepF20c4SsqVYG9mNA9Ikixg3bG4FoaEOkVwp0c6dkdXAKnBsJ8LKVA4U3zjjrTtWSB+CnfNX3z3LqLKLrYp1StaTM0kc336wVkDTABnixp19WZx7qeaS/gHKrXMeeAlAQpZC9fhhVaMyOWlTMcTBJjlgFstFcK6+Ijiuz0tFCESnYvz5p3/jRu4dbMs2nfVAx9i4IqaskNpgNCIncMzUMtHvd+XTGHGRCSFSha9nlG+bLBiSET4xhGHxA4Q9ibBa6Y3oqUIi84bJkhFwdEIZsc48="
+    file: "/home/travis/build/ccpgames/setuphelpers/dist/*.whl"
+    file_glob: true
+    skip_cleanup: true
+    on:
+      tags: true
+      condition: $TOXENV = py35
