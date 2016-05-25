@@ -5,6 +5,7 @@ import io
 import os
 import re
 import inspect
+from codecs import decode
 from subprocess import check_output
 from pkg_resources import parse_version
 from setuptools.command.test import test as TestCommand
@@ -252,8 +253,8 @@ def _has_tags():
     """Returns a boolean of if any git tags exist."""
 
     try:
-        return len(os.listdir(os.path.join(".git", "refs", "tags"))) > 0
-    except OSError:
+        return len(check_output(["git", "tag"]).splitlines()) > 0
+    except:
         return False
 
 
@@ -261,8 +262,8 @@ def _lastest_tag():
     """Gets the latest git tag according to PEP440."""
 
     latest_tag = parse_version("0.0.0")
-    for tag in os.listdir(os.path.join(".git", "refs", "tags")):
-        tag_version = parse_version(tag)
+    for tag in check_output(["git", "tag"]).splitlines():
+        tag_version = parse_version(_decoded(tag))
         if tag_version > latest_tag:
             latest_tag = tag_version
     return latest_tag.public
@@ -271,7 +272,7 @@ def _lastest_tag():
 def _tag_ref(git_tag):
     """Returns the ref for a tag."""
 
-    return _read_file(os.path.join(".git", "refs", "tags", git_tag))
+    return _decoded(check_output(["git", "show-ref", git_tag])).split(" ")[0]
 
 
 def _read_file(file_):
@@ -304,16 +305,16 @@ def _plus_one_minor(version):
 def _get_branch():
     """Returns the string branch name HEAD is pointing at."""
 
-    branch = _read_file(os.path.join(".git", "HEAD")).split("/")[-1]
-    try:
-        remotes = os.listdir(os.path.join(".git", "refs", "remotes"))
-    except OSError:
-        print("warning: no remotes found, assuming master branch")
-    else:
-        for rem in remotes:
-            branches = os.listdir(os.path.join(".git", "refs", "remotes", rem))
-            if branch in branches:
-                return branch
-        print("warning: unknown branch: {}, assuming master".format(branch))
+    fork = _decoded(check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"]))
+    if fork == "HEAD":
+        print("warning: HEAD is detatched? assuming master branch")
+        fork = "master"
+    return fork
 
-    return "master"
+
+def _decoded(string):
+    """Decodes byte strings."""
+
+    if isinstance(string, bytes):
+        string = decode(string, "utf-8")
+    return string
