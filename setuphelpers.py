@@ -305,11 +305,13 @@ def _plus_one_minor(version):
 def _get_branch():
     """Returns the string branch name HEAD is pointing at."""
 
-    fork = _decoded(check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"]))
-    if fork == "HEAD":
+    branch = _decoded(check_output(
+        ["git", "rev-parse", "--abbrev-ref", "HEAD"]
+    )).strip()
+    if branch == "HEAD":
         print("warning: HEAD is detatched? assuming master branch")
-        fork = "master"
-    return fork
+        branch = "master"
+    return branch
 
 
 def _decoded(string):
