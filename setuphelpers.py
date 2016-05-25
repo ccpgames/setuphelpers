@@ -223,6 +223,7 @@ def git_version():
     if git_tag:
         is_dev = False
         dev_release = 0
+        branch = "master"
     else:
         if _has_tags():
             git_tag = _lastest_tag()
