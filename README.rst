@@ -99,7 +99,7 @@ test with).
 .. code:: python
 
     from setuptools import setup
-    from setuphelpers import find_version
+    from setuphelpers import test_command
 
     setup(
         name="my_thing",
