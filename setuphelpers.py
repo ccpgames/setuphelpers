@@ -7,6 +7,7 @@ import re
 import inspect
 from codecs import decode
 from subprocess import check_output
+from subprocess import CalledProcessError
 from pkg_resources import parse_version
 from setuptools.command.test import test as TestCommand
 
@@ -216,7 +217,7 @@ def git_version():
 
     try:
         branch = os.environ.get("TRAVIS_BRANCH", _get_branch())
-    except (OSError, IOError):
+    except (OSError, IOError, CalledProcessError):
         print("warning: could not determine active git branch")
         branch = "master"
 
@@ -238,7 +239,7 @@ def git_version():
             is_dev = True
             try:
                 dev_release = _commits_since()
-            except (OSError, IOError):
+            except (OSError, IOError, CalledProcessError):
                 print("warning: no commits found, assuming first dev release")
                 dev_release = 1
 
