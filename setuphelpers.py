@@ -65,7 +65,7 @@ def test_command(pytest=True, nose=False, unittest=False, **kwargs):
 
 
 def pytest_command(verbose=True, exit_first=True, pdb=False, extra_fails=True,
-                   cover=None, test_dir=None):
+                   cover=None, test_dir=None, **kwargs):
     """Returns the PyTest TestCommand runner.
 
     You can use this directly if you want, or pass any of these kwargs to
@@ -78,6 +78,11 @@ def pytest_command(verbose=True, exit_first=True, pdb=False, extra_fails=True,
         extra_fails: print extra/detailed information on test failure
         cover: string module to display a coverage report for
         test_dir: string path to tests, if required for discovery
+
+    **KWArgs:
+        Any additional key/values passed will be translated into py.test
+        long options by prepending "--" to the key, and if the value is
+        not None, added to the key value.
 
     Returns:
         CommandClass object
@@ -96,6 +101,11 @@ def pytest_command(verbose=True, exit_first=True, pdb=False, extra_fails=True,
         test_args.extend(["--cov", cover, "--cov-report", "term-missing"])
     if test_dir:
         test_args.append(test_dir)
+
+    test_args.extend(
+        ["--{}{}".format(k, "={}".format(v) if v is not None else "") for
+         k, v in kwargs.items()]
+    )
 
     class PyTest(TestCommand):
         """TestCommand subclass to enable setup.py test."""
