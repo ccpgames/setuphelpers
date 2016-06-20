@@ -65,7 +65,7 @@ def test_command(pytest=True, nose=False, unittest=False, **kwargs):
 
 
 def pytest_command(verbose=True, exit_first=True, pdb=False, extra_fails=True,
-                   cover=None, test_dir=None, **kwargs):
+                   extra_skip=True, cover=None, test_dir=None, **kwargs):
     """Returns the PyTest TestCommand runner.
 
     You can use this directly if you want, or pass any of these kwargs to
@@ -76,13 +76,14 @@ def pytest_command(verbose=True, exit_first=True, pdb=False, extra_fails=True,
         exit_first: exit on the first test failure
         pdb: drop to a pdb session on test failure
         extra_fails: print extra/detailed information on test failure
+        extra_skip: print extra/detailed information on skipped tests
         cover: string module to display a coverage report for
         test_dir: string path to tests, if required for discovery
 
     **KWArgs:
-        Any additional key/values passed will be translated into py.test
-        long options by prepending "--" to the key, and if the value is
-        not None, added to the key value.
+        Any additional keys/values sent will be sent to py.test.
+        If the values are not None, they will be appended as well.
+        If they key does not start with a -, it will be prepended with 2.
 
     Returns:
         CommandClass object
@@ -97,15 +98,20 @@ def pytest_command(verbose=True, exit_first=True, pdb=False, extra_fails=True,
         test_args.append("--pdb")
     if extra_fails:
         test_args.append("-rx")
+    if extra_skip:
+        test_args.append("-rs")
     if cover:
         test_args.extend(["--cov", cover, "--cov-report", "term-missing"])
     if test_dir:
         test_args.append(test_dir)
 
-    test_args.extend(
-        ["--{}{}".format(k, "={}".format(v) if v is not None else "") for
-         k, v in kwargs.items()]
-    )
+    test_args.extend([
+        "{}{}{}".format(
+            "" if key.startswith("-") else "--",
+            key,
+            "={}".format(value) if value is not None else ""
+        ) for key, value in kwargs.items()
+    ])
 
     class PyTest(TestCommand):
         """TestCommand subclass to enable setup.py test."""
