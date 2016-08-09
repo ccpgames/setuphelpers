@@ -65,7 +65,7 @@ def test_pytest_command_class():
     with mock.patch.object(setuphelpers.TestCommand, "finalize_options"):
         pytest_cls.finalize_options(self)
     assert self.test_suite is True
-    assert self.test_args == ["-v", "-x", "-rx"]
+    assert self.test_args == ["-v", "-x", "-rx", "-rs"]
 
 
 def test_pytest_command_class__all_options():
@@ -74,8 +74,8 @@ def test_pytest_command_class__all_options():
     with mock.patch.object(setuphelpers.TestCommand, "finalize_options"):
         py_cls.finalize_options(self)
     assert self.test_suite is True
-    assert self.test_args == ["-v", "-x", "--pdb", "-rx", "--cov", "foo",
-                              "--cov-report", "term-missing", "bar"]
+    assert self.test_args == ["-v", "-x", "--pdb", "-rx", "-rs", "--cov",
+                              "foo", "--cov-report", "term-missing", "bar"]
 
 
 def test_nose_command_class():
