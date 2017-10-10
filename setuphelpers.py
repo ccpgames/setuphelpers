@@ -302,7 +302,7 @@ def _read_file(file_):
 def _commits_since(ref=None):
     """Returns the integer number of commits since ref (or None for all)."""
 
-    cmd = ["git", "rev-list", "--all", "--no-merges", "--count"]
+    cmd = ["git", "rev-list", "--no-merges", "--count"]
     if ref:
         cmd.append("{}..HEAD".format(ref))
     return int(check_output(cmd))
