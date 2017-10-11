@@ -305,6 +305,8 @@ def _commits_since(ref=None):
     cmd = ["git", "rev-list", "--no-merges", "--count"]
     if ref:
         cmd.append("{}..HEAD".format(ref))
+    else:
+        cmd.append("--all")
     return int(check_output(cmd))
 
 
