@@ -271,7 +271,7 @@ def _has_tags():
 
     try:
         return len(check_output(["git", "tag"]).splitlines()) > 0
-    except:
+    except Exception:
         return False
 
 
